@@ -2,11 +2,6 @@ package org.jfree.data;
 
 import static org.junit.Assert.*;
 
-import org.jfree.data.DataUtilities;
-import org.jfree.data.DefaultKeyedValues;
-import org.jfree.data.DefaultKeyedValues2D;
-import org.jfree.data.KeyedValues;
-import org.jfree.data.Values2D;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
