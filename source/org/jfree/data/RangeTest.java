@@ -3,21 +3,29 @@ package org.jfree.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 public class RangeTest
 {
 	private Range rangeObjectUnderTest;
 	private Range rangeObjectUnderTest2;
+	private Range rangeObjectUnderTest3;
+	private Range rangeObjectUnderTest4;
+	private Range rangeObjectUnderTest5;
 
 	@Before
 	public void setUp() throws Exception
 	{
 		rangeObjectUnderTest = new Range(-1, 1);
 		rangeObjectUnderTest2 = new Range(4, 9);
+		rangeObjectUnderTest3 = new Range(5.0, 10.0);
+		rangeObjectUnderTest4 = new Range(2, 4);
+		rangeObjectUnderTest5 = new Range(0, 5);
 	}
 
 	@After
@@ -89,6 +97,7 @@ public class RangeTest
 	// ADDED TESTS
 	
 	// Method Under Test: intersects
+	// Black Box Tests:
 	
 	@Test
 	public void testIntersectsLowerAndUpperIsSameAsObject()
@@ -131,7 +140,28 @@ public class RangeTest
 						Double.MAX_VALUE));
 	}
 	
+	// White Box Tests
+	
+	@Test
+	public void testIntersectsLowerAboveLowerBoundAndUpperBelowUpperBound()
+	{
+		assertEquals("intersects: Did not return the expected output",
+				true,
+				rangeObjectUnderTest2.intersects(5,
+						5));
+	}
+	
+	@Test
+	public void testIntersectsLowerAboveLowerBoundAndUpperBelowLowerBound()
+	{
+		assertEquals("intersects: Did not return the expected output",
+				false,
+				rangeObjectUnderTest2.intersects(5,
+						3));
+	}
+	
 	// Method Under Test: constrain
+	// Black Box Tests:
 	
 	@Test
 	public void testConstrainValueEqualToLowerBound()
@@ -188,6 +218,7 @@ public class RangeTest
 	}
 	
 	// Method Under Test: contains
+	// Black Box Tests:
 	
 	@Test
 	public void testContainsValueEqualToLowerBound()
@@ -232,6 +263,7 @@ public class RangeTest
 	}
 	
 	// Method Under Test: getCentralValue
+	// Black Box Tests:
 	
 	@Test
 	public void testGetCentralValueRangeHasOneValue()
@@ -278,6 +310,7 @@ public class RangeTest
 	}
 	
 	// Method Under Test: expandToInclude
+	// Black Box Tests:
 	
 	@Test
 	public void testExpandToIncludeRangeIsNull()
@@ -357,5 +390,216 @@ public class RangeTest
 		assertEquals("expandToInclude: Did not return the expected output",
 				new Range(3, 8),
 				Range.expandToInclude(r17, 8));
+	}
+	
+	// Method Under Test: combine
+	// White Box Tests:
+	
+	@Test
+	public void testCombineBothRangesNull()
+	{
+		assertEquals("combine: Did not return the expected output",
+				null,
+				Range.combine(null, null));
+	}
+	
+	@Test
+	public void testCombineRange1Null()
+	{
+		assertEquals("combine: Did not return the expected output",
+				new Range(5.0, 10.0),
+				Range.combine(null, rangeObjectUnderTest3));
+	}
+	
+	@Test
+	public void testCombineRange2Null()
+	{
+		assertEquals("combine: Did not return the expected output",
+				new Range(5.0, 10.0),
+				Range.combine(rangeObjectUnderTest3, null));
+	}
+	
+	@Test
+	public void testCombineNeitherRangeNull()
+	{
+		assertEquals("combine: Did not return the expected output",
+				new Range(5.0, 12.0),
+				Range.combine(rangeObjectUnderTest3, new Range(8.0, 12.0)));
+	}
+	
+	@Test
+	public void testCombineBothLowerBoundsEqual()
+	{
+		assertEquals("combine: Did not return the expected output",
+				new Range(5.0, 12.0),
+				Range.combine(rangeObjectUnderTest3, new Range(5.0, 12.0)));
+	}
+	
+	@Test
+	public void testCombineBothUpperBoundsEqual()
+	{
+		assertEquals("combine: Did not return the expected output",
+				new Range(2.0, 10.0),
+				Range.combine(rangeObjectUnderTest3, new Range(2.0, 10.0)));
+	}
+	
+	@Test
+	public void testCombineSameUpperAndLowerBounds()
+	{
+		assertEquals("combine: Did not return the expected output",
+				new Range(5.0, 10.0),
+				Range.combine(rangeObjectUnderTest3, new Range(5.0, 10.0)));
+	}
+	
+	// Method Under Test: expand
+	// White Box Tests:
+	
+	@Test
+	public void testExpandLowerAndUpperZero()
+	{
+		assertEquals("expand: Did not return the expected output",
+				new Range(0, 10),
+				Range.expand(new Range(0, 10), 0, 0));
+	}
+	
+	@Test
+	public void testExpandLowerAndUpperOne()
+	{
+		assertEquals("expand: Did not return the expected output",
+				new Range(-10, 20),
+				Range.expand(new Range(0, 10), 1, 1));
+	}
+	
+	@Test
+	public void testExpandNegativeLowerPositiveUpper()
+	{
+		assertEquals("expand: Did not return the expected output",
+				new Range(-2.5, 15),
+				Range.expand(new Range(0, 10), -0.25, 0.5));
+	}
+	
+	@Test
+	public void testExpandNullRange()
+	{
+		try
+		{
+			Range.expand(null, 0.1, 0.2);
+			fail("expand: Did not throw IllegalArgumentException when Range is null");
+		}
+		catch(IllegalArgumentException e)
+		{
+			// Test passes
+		}
+	}
+	
+	@Test
+	public void testExpandRangeWithLengthZero()
+	{
+		assertEquals("expand: Did not return the expected output",
+				new Range(5, 5),
+				Range.expand(new Range(5, 5), 0.1, 0.2));
+	}
+	
+	// Method Under Test: shift
+	// White Box Tests:
+	
+	@Test
+	public void testShiftNullBase()
+	{
+		try
+		{
+			Range.shift(null, 5);
+			fail("shift: Did not throw NullPointerException when base is null");
+		}
+		catch(NullPointerException e)
+		{
+			// Test passes
+		}
+	}
+	
+	@Test
+	public void testShiftPositiveDelta()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(5, 7),
+				Range.shift(rangeObjectUnderTest4, 3));
+	}
+	
+	@Test
+	public void testShiftNegativeDelta()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(1, 3),
+				Range.shift(rangeObjectUnderTest4, -1));
+	}
+	
+	@Test
+	public void testShiftDeltaZero()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(2, 4),
+				Range.shift(rangeObjectUnderTest4, 0));
+	}
+	
+	@Test
+	public void testShiftNegativeDeltaWithZeroCrossing()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(-1, 1),
+				Range.shift(rangeObjectUnderTest4, -3, true));
+	}
+	
+	@Test
+	public void testShiftNegativeDeltaWithNoZeroCrossing()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(0, 1),
+				Range.shift(rangeObjectUnderTest4, -3, false));
+	}
+	
+	@Test
+	public void testShiftNegativeLowerBound()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(0, 1),
+				Range.shift(new Range(-3, 4), -3));
+	}
+	
+	@Test
+	public void testShiftLowerBoundZero()
+	{
+		assertEquals("shift: Did not return the expected output",
+				new Range(0, 1),
+				Range.shift(new Range(0, 4), -3));
+	}
+	
+	// Method Under Test: equals
+	// White Box Tests:
+	
+	@Test
+	public void testEqualsLowerIsEqualAndUpperIsNot()
+	{
+		Range range2 = new Range(0, 6);
+		
+		assertEquals("equals: Did not return the expected output",
+				false,
+				rangeObjectUnderTest5.equals(range2));
+	}
+	
+	// Method Under Test: Range
+	// White Box Tests:
+	
+	@Test
+	public void testRangeLowerGreaterThanUpper()
+	{
+		try
+		{
+			Range range = new Range(10, 5);
+			fail("Range: Did not throw IllegalArgumentException when lower is greater than upper");
+		}
+		catch (IllegalArgumentException e)
+		{
+			// Test passes
+		}
 	}
 }
