@@ -1,27 +1,32 @@
 package org.jfree.data;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import org.jfree.data.DataUtilities;
+import org.jfree.data.DefaultKeyedValues;
+import org.jfree.data.DefaultKeyedValues2D;
+import org.jfree.data.KeyedValues;
+import org.jfree.data.Values2D;
+import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DatasetUtilities;
 
-public class DataUtilitiesTest extends DataUtilities 
+public class DataUtilitiesTest 
 {
 	private Values2D values2D;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
-	{
+	public static void setUpBeforeClass() throws Exception {
 	}
 
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception
-	{
+	public static void tearDownAfterClass() throws Exception {
 	}
 
 	@Before
@@ -76,6 +81,23 @@ public class DataUtilitiesTest extends DataUtilities
 		}
 	}
 	
+	// White Box testing for: 
+	
+	@Test // calculateColumnTotal function
+	public void testTableWithNullData()
+	{
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		dataset.addValue(null, 0, 0);
+
+        int column = 0;
+        double expectedTotal = 0.0;
+        double actualTotal = DataUtilities.calculateColumnTotal(dataset, column);
+
+        assertEquals(expectedTotal, actualTotal, 0.0001);
+	}
+	
+	
+
 	@Test // calculateColumnTotal function
 	public void testZeroBasedColumnIndex()
 	{
@@ -113,13 +135,10 @@ public class DataUtilitiesTest extends DataUtilities
 		dataset.addValue(3, "Row 3", "Column 3");
 		int columnIndex = 4;
 		
-		try
-		{
+		try {
 	        DataUtilities.calculateColumnTotal(dataset, columnIndex);
 	        fail("Expected IndexOutOfBoundsException was not thrown");
-	    }
-		catch (IndexOutOfBoundsException e)
-		{
+	    } catch (IndexOutOfBoundsException e) {
 	        
 	    }
 	}
@@ -161,13 +180,10 @@ public class DataUtilitiesTest extends DataUtilities
 		dataset.addValue(3, "Row 3", "Column 3");
 		int columnIndex = -3;
 		
-		try
-		{
+		try {
 	        DataUtilities.calculateColumnTotal(dataset, columnIndex);
 	        fail("Expected IndexOutOfBoundsException was not thrown");
-	    }
-		catch (IndexOutOfBoundsException e)
-		{
+	    } catch (IndexOutOfBoundsException e) {
 	        
 	    }
 	}
@@ -210,6 +226,21 @@ public class DataUtilitiesTest extends DataUtilities
 		}
 	}
 	
+	// White Box testing for: 
+	
+		@Test // calculateRowTotal function
+		public void testTableWithNullDataRow()
+		{
+			DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+			dataset.addValue(null, 0, 0);
+
+	        int row = 0;
+	        double expectedTotal = 0.0;
+	        double actualTotal = DataUtilities.calculateRowTotal(dataset, row);
+
+	        assertEquals(expectedTotal, actualTotal, 0.0001);
+		}
+	
 	@Test // calculateRowTotal function
 	public void testZeroBasedRowIndex()
 	{
@@ -247,13 +278,10 @@ public class DataUtilitiesTest extends DataUtilities
 		dataset.addValue(3, "Row 3", "Column 3");
 		int rowIndex = 3;
 		
-		try
-		{
+		try {
 	        DataUtilities.calculateRowTotal(dataset, rowIndex);
 	        fail("Expected IndexOutOfBoundsException was not thrown");
-	    }
-		catch (IndexOutOfBoundsException e)
-		{
+	    } catch (IndexOutOfBoundsException e) {
 	        
 	    }
 	}
@@ -295,13 +323,10 @@ public class DataUtilitiesTest extends DataUtilities
 		dataset.addValue(3, "Row 3", "Column 3");
 		int rowIndex = -3;
 		
-		try
-		{
+		try {
 	        DataUtilities.calculateRowTotal(dataset, rowIndex);
 	        fail("Expected IndexOutOfBoundsException was not thrown");
-	    }
-		catch (IndexOutOfBoundsException e)
-		{
+	    } catch (IndexOutOfBoundsException e) {
 	        
 	    }
 	}
@@ -450,12 +475,42 @@ public class DataUtilitiesTest extends DataUtilities
 	    
 	    KeyedValues actual = DataUtilities.getCumulativePercentages(values);
 	    
-	    for (int i = 0; i < expected.getItemCount(); i++)
-	    {
+	    for (int i = 0; i < expected.getItemCount(); i++) {
 	        Comparable key = expected.getKey(i);
 	        double expectedValue = expected.getValue(key).doubleValue();
 	        double actualValue = actual.getValue(key).doubleValue();
 	        assertEquals(expectedValue, actualValue, 0.0001);
 	    }
+	
 	}	
+		
+	//White Box Testing for getCumulativePercentages
+		@Test // calculateColumnTotal function
+		public void getCumulativePercentagesWithNullData()
+		{
+			KeyedValues values = new DefaultKeyedValues();
+		    ((DefaultKeyedValues) values).addValue("A", 1);
+		    ((DefaultKeyedValues) values).addValue("B", null);
+		    ((DefaultKeyedValues) values).addValue("C", 3);
+		    ((DefaultKeyedValues) values).addValue("D", 4);
+		    ((DefaultKeyedValues) values).addValue("E", 5);
+		    
+		    KeyedValues expected = new DefaultKeyedValues();
+		    ((DefaultKeyedValues) expected).addValue("A", 0.2);
+		    ((DefaultKeyedValues) expected).addValue("B", null);
+		    ((DefaultKeyedValues) expected).addValue("C", 0.6);
+		    ((DefaultKeyedValues) expected).addValue("D", 0.8);
+		    ((DefaultKeyedValues) expected).addValue("E", 1.0);
+		    
+		    
+		    KeyedValues actual = DataUtilities.getCumulativePercentages(values);
+		    
+		    for (int i = 0; i < expected.getItemCount(); i++) {
+		        Comparable key = expected.getKey(i);
+		        double expectedValue = expected.getValue(key).doubleValue();
+		        double actualValue = actual.getValue(key).doubleValue();
+		        assertEquals(expectedValue, actualValue, 0.0001);
+		    }
+		}
+		
 }
